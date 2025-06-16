@@ -1,0 +1,67 @@
+
+package javaapplication18;
+import java.sql.*;
+public class JavaApplication18 {
+
+   
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3307/"; // Adjust port if needed
+        String user = "root";
+        String password = "password";
+
+        try {
+            // Load JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // Create database
+            try (Connection con = DriverManager.getConnection(url, user, password);
+                 Statement stmt = con.createStatement()) {
+                stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS company");
+                System.out.println("Database created successfully");
+
+                // Connect to the company database
+                try (Connection con2 = DriverManager.getConnection(url + "company", user, password);
+                     Statement stmt2 = con2.createStatement()) {
+
+                    // Create employee table
+                    stmt2.executeUpdate("CREATE TABLE IF NOT EXISTS employee(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50), salary INT, dept VARCHAR(50))");
+                    System.out.println("Employee table created successfully");
+
+                    // Create department table
+                    stmt2.executeUpdate("CREATE TABLE IF NOT EXISTS department(dept_id INT AUTO_INCREMENT PRIMARY KEY, dept_name VARCHAR(50))");
+                    System.out.println("Department table created successfully");
+
+                    // Insert data into employee table
+                    stmt2.executeUpdate("INSERT INTO employee(name, salary, dept) VALUES ('tanu', 4000, 'IT'), ('Suraiya', 6000, 'Finance'), ('Ellin', 5000, 'HR')");
+                    System.out.println("Data inserted into employee table");
+
+                    // Insert data into department table
+                    stmt2.executeUpdate("INSERT INTO department(dept_name) VALUES ('IT'), ('Finance'), ('Marketing')");
+                    System.out.println("Data inserted into department table");
+
+                    // Perform INNER JOIN to combine employee and department tables
+                    try (ResultSet rs = stmt2.executeQuery(
+                            "SELECT employee.id, employee.name, employee.salary, employee.dept, department.dept_id " +
+                            "FROM employee " +
+                            "INNER JOIN department ON employee.dept = department.dept_name")) {
+                        System.out.println("ID\tName\t\tSalary\tDept\t\tDept ID");
+                        System.out.println("-----------------------------------------------");
+                        while (rs.next()) {
+                            int empId = rs.getInt("id");
+                            String empName = rs.getString("name");
+                            int empSalary = rs.getInt("salary");
+                            String empDept = rs.getString("dept");
+                            int deptId = rs.getInt("dept_id");
+                            System.out.printf("%d\t%-10s\t%d\t%-10s\t%d\n", empId, empName, empSalary, empDept, deptId);
+                        }
+                    }
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver not found: " + e);
+        } catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+        }
+    }
+    
+}
