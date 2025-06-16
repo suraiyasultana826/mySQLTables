@@ -1,0 +1,63 @@
+
+package test;
+import java.sql.*;
+public class Test {
+
+    
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3307/";
+        String user = "root";
+        String password = "password";
+        Connection con = null;
+        Statement stmt = null;
+        try{
+          con = DriverManager.getConnection(url,user, password);
+          stmt= con.createStatement();
+          stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS student");
+            System.out.println("database created successfully");
+            con = DriverManager.getConnection(url+"student", user, password);
+            stmt=con.createStatement();
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS allData(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(10), grade VARCHAR(20),cgpa DECIMAL(3,2))");
+            System.out.println("Table created successfully");
+            //stmt.executeUpdate("INSERT INTO allData(name, grade, cgpa) VALUES ('ellin', 'A+', 3.8), ('tithi', 'B+', 3.70)");
+            //stmt.executeUpdate("DELETE FROM allData WHERE name = 'ellin'");
+            ResultSet rs = stmt.executeQuery("Select * FROM allData");
+            while(rs.next()){
+                int stu_Id = rs.getInt("id");
+                String stu_name = rs.getString("name");
+                String stu_grade = rs.getString("grade");
+                float stu_cgpa = rs.getFloat("cgpa");
+                System.out.printf("%d\t%s\t%s\t%.2f\t\n", stu_Id, stu_name, stu_grade, stu_cgpa);
+            }
+            
+            //new table
+             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS employee(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(10), salary INT, dept VARCHAR(10))");
+            System.out.println("Table created successfully");
+            stmt.executeUpdate("INSERT INTO employee(name, salary, dept) VALUES ('tanu', 4000, 'IT'), ('Suraiya', 6000, 'Banker')");
+            //stmt.executeUpdate("DELETE FROM allData WHERE name = 'ellin'");
+            ResultSet emp = stmt.executeQuery("Select * FROM employee");
+            while(emp.next()){
+                int emp_Id = emp.getInt("id");
+                String emp_name = emp.getString("name");
+                int emp_salary = emp.getInt("salary");
+                String emp_dept = emp.getString("dept");
+                System.out.printf("%d\t%s\t%d\t%s\t\n", emp_Id, emp_name, emp_salary, emp_dept);
+            }
+            
+            //highest cgpa
+            System.out.println("Highest cgpa is:\n ");
+            ResultSet highestCgpa = stmt.executeQuery("SELECT * FROM allData ORDER BY cgpa DESC LIMIT 3");
+            while(highestCgpa.next()){
+                int high_Id = highestCgpa.getInt("id");
+                String high_name = highestCgpa.getString("name");
+                String high_grade = highestCgpa.getString("grade");
+                float high_cgpa = highestCgpa.getFloat("cgpa");
+                System.out.printf("%d\t%s\t%s\t%.2f\t\n", high_Id, high_name, high_grade, high_cgpa);
+            }
+            
+        }catch(SQLException e){
+            System.out.println("Exception : "+e);
+        }
+    }
+    
+}
